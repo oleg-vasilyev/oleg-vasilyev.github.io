@@ -126,7 +126,10 @@ $(window).resize(() => {
 });
 
 $(() => {
-
+  let hash = window.location.hash; 
+  let parts = hash.split("="); 
+  let userID = parts[1] || null; 
+	
 	// $.ajax({
 	// 	type: 'POST',
 	// 	url: 'http://jjsbot-samosadov.rhcloud.com/api/v1/result',

@@ -1,8 +1,10 @@
+const containerName = "sobjeka--user-friends-chart";
+
 let selectedNode = null;
 
-let openUser = (id) => {
-	window.open(`https://vk.com/id${id}`);
-}
+let data = null;
+
+let openUser = (id) => window.open(`https://vk.com/id${id}`);
 
 let drawDetails = (selectedNode) => {
 	$('image-container').html(`<img src="${selectedNode.photoURL}" onclick="openUser(${selectedNode.link})"/>`);
@@ -11,19 +13,32 @@ let drawDetails = (selectedNode) => {
 	$('info-container--city').text(selectedNode.city);
 }
 
+
 let drawChart = (data) => {
+
+	let zoom = d3.behavior.zoom()
+		.scaleExtent([0.5, 2])
+		.on("zoom", () => { container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")"); });
+
+	var drag = d3.behavior.drag()
+		.origin(function (d) { return d; })
+		.on("dragstart", function (evt) {
+			d3.event.sourceEvent.stopPropagation();
+			force.start();
+		})
+		.on("drag", function (d) {
+			d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+		})
+
 	let selectedNode = data.nodes[0];
 
 	let onNodeClick = function (nodeData) {
 		selectedNode = nodeData;
-
 		node.classed("selected", (d) => nodeData.id === d.id ? true : false)
-		link.classed("red", (d) => nodeData.id === d.source.id || nodeData.id === d.target.id ? true : false);
+		link.classed("active", (d) => nodeData.id === d.source.id || nodeData.id === d.target.id ? true : false);
 		drawDetails(nodeData);
 	}
 
-
-	const containerName = "jjs--user-friends-chart";
 	let width = $(containerName).width();
 	let height = $(containerName).height();
 
@@ -31,13 +46,22 @@ let drawChart = (data) => {
 		.select(containerName)
 		.append("svg")
 		.attr("width", width)
-		.attr("height", height);
+		.attr("height", height)
+		.call(zoom);
+
+	var rect = svg.append("rect")
+		.attr("width", width)
+		.attr("height", height)
+		.style("fill", "none")
+		.style("pointer-events", "all");
+
+	let container = svg.append("g");
 
 	let force = d3.layout
 		.force()
-		.gravity(0.05)
-		.linkDistance(450)
-		.charge(-2500)
+		.gravity(0.06)
+		.linkDistance(200)
+		.charge(-3000)
 		.friction(.9)
 		.size([width, height]);
 
@@ -47,7 +71,7 @@ let drawChart = (data) => {
 		.start();
 
 	let link =
-		svg
+		container
 			.selectAll(".link")
 			.data(data.links)
 			.enter()
@@ -55,14 +79,14 @@ let drawChart = (data) => {
 			.attr("class", "link");
 
 	let node =
-		svg
+		container
 			.selectAll(".node")
 			.data(data.nodes)
 			.enter()
 			.append("g")
 			.on("click", onNodeClick)
 			.attr("class", "node")
-			.call(force.drag);
+			.call(drag);
 
 	let imagePattern = node.append("pattern")
 		.attr("id", (d) => d.id)
@@ -72,12 +96,12 @@ let drawChart = (data) => {
 		.attr("y", "0");
 
 	imagePattern.append("image")
-		.attr("height", 100)
-		.attr("width", 100)
+		.attr("height", 85)
+		.attr("width", 85)
 		.attr("xlink:href", (d) => d.photoURL)
 
 	let circles = node.append("circle")
-		.attr("r", 50)
+		.attr("r", 40)
 		.attr("cy", 0)
 		.attr("cx", 0)
 		.attr("fill", (d) => `url(#${d.id})`)
@@ -94,13 +118,14 @@ let drawChart = (data) => {
 	onNodeClick(selectedNode);
 }
 
+$(window).resize(() => {
+	if (data) {
+		$(containerName).empty();
+		drawChart(data);
+	}
+});
 
 $(() => {
-
-	// let hash = window.location.hash;
-	// let temp = hash.split("&");
-	// let token = temp[0].split("=")[1];
-	// let userID = temp[2].split("=")[1];
 
 	// $.ajax({
 	// 	type: 'POST',
@@ -109,96 +134,9 @@ $(() => {
 	// 		userID: "113333501",
 	// 		token: "33e213d51ceef6b57a9a23ce971b3caca7000005fad2169664eb7019b4978820e740c99df204e84a3358f"
 	// 	},
-	// 	success: (d) => {
+	// 	success: (data) => {
 
-	// 		let dataJSON = d;
-	// 		console.log(d);
-
-	// 		dataJSON = {
-	// 			"nodes": [
-	// 				{
-	// 					"id": 0,
-	// 					"userName": "Oleg",
-	// 					"birthday": "20.12.1990",
-	// 					"city": "Mogilev",
-	// 					"photoURL": "https://pp.userapi.com/c626216/v626216501/58ec7/cD-T9mbotkY.jpg"
-	// 				},
-	// 				{
-	// 					"id": 1,
-	// 					"birthday": "20.12.1992",
-	// 					"city": "Mogilev",
-	// 					"userName": "Pasha",
-	// 					"photoURL": "https://pp.userapi.com/c630416/v630416230/4cbd2/U8bN6ptiThA.jpg"
-	// 				},
-	// 				{
-	// 					"id": 2,
-	// 					"birthday": "20.12.1993",
-	// 					"city": "Mogilev",
-	// 					"userName": "Kot",
-	// 					"photoURL": "https://cs540105.userapi.com/c637628/v637628825/4093b/cdDgiq6i0oU.jpg"
-	// 				},
-	// 				{
-	// 					"id": 3,
-	// 					"birthday": "20.12.1990",
-	// 					"city": "Mogilev",
-	// 					"userName": "Kostya",
-	// 					"photoURL": "https://pp.userapi.com/c628731/v628731635/1e6cf/_O80c9IKfeg.jpg"
-	// 				},
-	// 				{
-	// 					"id": 4,
-	// 					"birthday": "20.12.1990",
-	// 					"city": "Mogilev",
-	// 					"userName": "Kostya",
-	// 					"photoURL": "https://pp.userapi.com/c639231/v639231412/14b3a/KNZfLEK-7pc.jpg"
-	// 				},
-	// 				{
-	// 					"id": 5,
-	// 					"birthday": "20.12.1990",
-	// 					"city": "Mogilev",
-	// 					"userName": "Kostya",
-	// 					"photoURL": "https://pp.userapi.com/c543101/v543101190/2e63d/NwFGt2OMNTw.jpg"
-	// 				},
-	// 				{
-	// 					"id": 6,
-	// 					"birthday": "20.12.1990",
-	// 					"city": "Mogilev",
-	// 					"userName": "Kostya",
-	// 					"photoURL": "https://pp.userapi.com/c837132/v837132424/32c61/aCZuNR17Alg.jpg"
-	// 				}
-	// 			],
-	// 			"links": [
-	// 				{
-	// 					"source": 1,
-	// 					"target": 0,
-	// 				},
-	// 				{
-	// 					"source": 1,
-	// 					"target": 2,
-	// 				},
-	// 				{
-	// 					"source": 1,
-	// 					"target": 3,
-	// 				},
-	// 				{
-	// 					"source": 2,
-	// 					"target": 3,
-	// 				},
-	// 				{
-	// 					"source": 2,
-	// 					"target": 4,
-	// 				},
-	// 				{
-	// 					"source": 3,
-	// 					"target": 5,
-	// 				},
-	// 				{
-	// 					"source": 4,
-	// 					"target": 6,
-	// 				}
-	// 			]
-	// 		};
-
-	// 		drawChart(dataJSON);
+	// 		drawChart(data);
 
 	// 	},
 	// 	error: (e) => console.error(e)
@@ -516,8 +454,8 @@ $(() => {
 			{
 				"source": 15,
 				"target": 18,
-			
-				},
+
+			},
 			{
 				"source": 7,
 				"target": 18,
@@ -597,6 +535,7 @@ $(() => {
 		]
 	}
 
+	data = dataJSON;
 
 	drawChart(dataJSON);
 

@@ -1,8 +1,8 @@
-.link {
+line.link {
   stroke: #ccc;
 }
 
-.red {
+line.link.active {
   stroke: red;
 }
 
@@ -10,11 +10,16 @@
 	stroke: #ccc;
 }
 
+.node circle:hover {
+	cursor: pointer;
+}
+
 .node.selected circle {
 	stroke: red;
 }
 
-html, body, jjs {
+html, body, sobjeka {
+	display: block;
 	height: 100%;
 	width: 100%;
 	margin: 0;
@@ -23,33 +28,43 @@ html, body, jjs {
 	font-family: 'Roboto';
 }
 
-jjs {
+sobjeka {
 	display: flex;
-	justify-content: center;
 }
 
-jjs--user-friends-chart {
+sobjeka--user-friends-chart {
+	display: block;
 	height: 100%;
 	width: 100%;
 }
 
-jjs--details {
-	height: 100%;
-	width: 100%;
-	flex-basis: 300px;
+sobjeka--details {
 	display: flex;
+	position: absolute;
+	top: 0;
+	left: 0;
 	flex-direction: column;
 	justify-content: center;
-	padding: 30px;
-	border-right: 1px solid whitesmoke;
+	margin: 30px;
+}
+
+sobjeka--footer {
+	position: absolute;
+	margin: 30px;
+	bottom: 0;
+	right: 0;
+	font-size: 10px;
+	line-height: 2em;
+	letter-spacing: .2em;
+
 }
 
 info-container {
 	display: flex;
 	flex-direction: column;
-	font-size: 18px;
-	line-height: 30px;
-	letter-spacing: .15em;
+	font-size: 10px;
+	line-height: 2em;
+	letter-spacing: .2em;
 }
 
 image-container {
@@ -59,5 +74,6 @@ image-container {
 
 image-container img {
 	max-width: 100%;
-	height: 200px;
+	height: 130px;
+	border: 1px solid whitesmoke;
 }
